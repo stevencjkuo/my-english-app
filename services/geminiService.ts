@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { StudentLevel, Word, QuizQuestion } from "../types";
+import { StudentLevel, Word, QuizQuestion, TargetLanguage } from "../types";
 
 // Audio Helper: Decode base64 to Uint8Array
 function decodeBase64(base64: string): Uint8Array {
@@ -33,12 +33,12 @@ async function decodeAudioData(
 }
 
 export const geminiService = {
-  // Use gemini-3-flash-preview for basic text tasks
-  async fetchWordsByLevel(level: StudentLevel, count: number = 10): Promise<Word[]> {
+  // Use gemini-3-flash-preview for all basic text tasks to ensure accessibility
+  async fetchWordsByLevel(level: StudentLevel, targetLanguage: TargetLanguage, count: number = 10): Promise<Word[]> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate ${count} essential English vocabulary words for ${level} students. Include phonetic symbols, Chinese translation, a concise English definition, and one high-quality example sentence with its Chinese translation.`,
+      contents: `Generate ${count} essential English vocabulary words for ${level} students. All explanations and translations MUST be in ${targetLanguage}. Include phonetic symbols, ${targetLanguage} translation, a concise English definition, and one high-quality example sentence with its ${targetLanguage} translation.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -73,12 +73,12 @@ export const geminiService = {
     }
   },
 
-  // Use gemini-3-pro-preview for complex reasoning tasks like quiz generation
+  // Switch to gemini-3-flash-preview for quiz generation to avoid mandatory paid key selection
   async generateQuiz(words: Word[]): Promise<QuizQuestion[]> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const wordsList = words.map(w => w.word).join(', ');
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Generate a vocabulary quiz for these words: ${wordsList}. For each word, create one multiple-choice question. The question can be about the meaning or a sentence completion. Provide 4 options for each.`,
       config: {
         responseMimeType: "application/json",
@@ -102,17 +102,19 @@ export const geminiService = {
     return JSON.parse(response.text || "[]");
   },
 
-  // Use gemini-2.5-flash-preview-tts for speech generation
-  async playPronunciation(text: string): Promise<void> {
+  // Enhanced TTS to handle different languages
+  async playPronunciation(text: string, languageName: string = "English"): Promise<void> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
+      // Prompt specifically mentions the language to improve accent and naturalness
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text: `Pronounce: ${text}` }] }],
+        contents: [{ parts: [{ text: `Pronounce this in ${languageName}: ${text}` }] }],
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
             voiceConfig: {
+              // Kore is generally versatile, Gemini TTS will automatically adapt accent based on the text and prompt
               prebuiltVoiceConfig: { voiceName: 'Kore' },
             },
           },
