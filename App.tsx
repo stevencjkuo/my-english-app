@@ -30,12 +30,6 @@ const App: React.FC = () => {
     };
   });
 
-  useEffect(() => {
-    if (stats.targetLanguage) {
-      setTargetLang(stats.targetLanguage);
-    }
-  }, [stats.targetLanguage]);
-
   const loadWords = useCallback(async (selectedLevel: StudentLevel, language: TargetLanguage) => {
     setIsLoading(true);
     try {
@@ -112,7 +106,7 @@ const App: React.FC = () => {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
               E
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight hidden lg:block">EngVantage</h1>
+            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">EngVantage</h1>
           </div>
 
           <nav className="hidden md:flex space-x-1 bg-slate-100 p-1 rounded-xl">
@@ -121,56 +115,46 @@ const App: React.FC = () => {
             <button onClick={() => setLevel(StudentLevel.TOEIC)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${level === StudentLevel.TOEIC ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>多益</button>
           </nav>
 
-          <div className="flex items-center space-x-2 md:space-x-4">
+          <div className="flex items-center space-x-4">
             <div className="relative">
-              <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-white hover:border-indigo-300 transition-all group">
-                <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 hidden xs:block">{targetLang}</span>
+              <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-white hover:border-indigo-300 transition-all">
+                <span className="text-sm font-bold text-slate-600">{targetLang}</span>
               </button>
               {showLangMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowLangMenu(false)}></div>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50">
                     {Object.values(TargetLanguage).map((lang) => (
-                      <button key={lang} onClick={() => handleLanguageChange(lang)} className={`w-full text-left px-4 py-3 text-sm font-semibold transition-colors flex items-center justify-between ${targetLang === lang ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{lang}</button>
+                      <button key={lang} onClick={() => handleLanguageChange(lang)} className={`w-full text-left px-4 py-3 text-sm font-semibold ${targetLang === lang ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{lang}</button>
                     ))}
                   </div>
                 </>
               )}
             </div>
-            <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-            <div className="text-right hidden lg:block">
+            <div className="text-right hidden sm:block">
               <p className="text-xs font-bold text-slate-400 uppercase">已學單字</p>
               <p className="text-lg font-bold text-indigo-600">{stats.totalWordsLearned}</p>
             </div>
-            <button onClick={() => loadWords(level, targetLang)} className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-            </button>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-10">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <div className="flex flex-col items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p className="text-slate-500 font-medium">正在為您準備 {level} 單字...</p>
+            <p className="mt-4 text-slate-500">正在準備單字...</p>
           </div>
         ) : (
-          <>
-            <section className="mb-12">
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-2">單字庫</h2>
-              <p className="text-slate-500 text-lg">目前學習範圍：{level} ({targetLang})</p>
-            </section>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {words.map(word => (
-                <WordCard key={word.id} word={word} onToggleLearned={toggleLearned} />
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {words.map(word => (
+              <WordCard key={word.id} word={word} onToggleLearned={toggleLearned} />
+            ))}
+          </div>
         )}
 
         {!isLoading && words.length > 0 && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2">
             <button onClick={startQuiz} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl hover:scale-105 transition-transform">
               開始測驗
             </button>
