@@ -31,34 +31,49 @@ async function decodeAudioData(
   }
   return buffer;
 }
-
 export const geminiService = {
-  // Use gemini-3-flash-preview for all basic text tasks to ensure accessibility
   async fetchWordsByLevel(level: StudentLevel, targetLanguage: TargetLanguage, count: number = 10): Promise<Word[]> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Generate ${count} essential English vocabulary words for ${level} students. All explanations and translations MUST be in ${targetLanguage}. Include phonetic symbols, ${targetLanguage} translation, a concise English definition, and one high-quality example sentence with its ${targetLanguage} translation.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              word: { type: Type.STRING },
-              phonetic: { type: Type.STRING },
-              definition: { type: Type.STRING },
-              translation: { type: Type.STRING },
-              exampleSentence: { type: Type.STRING },
-              exampleTranslation: { type: Type.STRING },
-            },
-            propertyOrdering: ["word", "phonetic", "definition", "translation", "exampleSentence", "exampleTranslation"]
-          }
-        }
-      }
-    });
+    // 1. 微調後的 Prompt：強調純 JSON 格式與欄位一致性
+    const prompt = `Generate ${count} essential English vocabulary words for ${level} students. 
+    All explanations and translations MUST be in ${targetLanguage}. 
+    Return the result as a PURE JSON array of objects. 
+    Each object must have these EXACT keys: "word", "phonetic", "definition", "translation", "exampleSentence", "exampleTranslation".
+    DO NOT include markdown formatting, backticks, or any text other than the JSON array.`;
 
+    try {
+      // 2. 呼叫 Render 後端
+      const response = await fetch("https://startulip.onrender.com/api/gemini", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: prompt }) 
+      });
+
+      if (!response.ok) {
+        throw new Error(`伺服器回應錯誤: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 3. 取得內容並處理潛在的空白字元
+      let resultText = data.candidates[0].content.parts[0].text.trim();
+      
+      // 額外防呆：如果 Gemini 還是噴了 ```json ... ```，將其濾掉
+      if (resultText.startsWith("```")) {
+        resultText = resultText.replace(/```json|```/g, "").trim();
+      }
+
+      // 4. 解析為 Word 陣列
+      const words: Word[] = JSON.parse(resultText);
+      return words;
+
+    } catch (error) {
+      console.error("獲取單字失敗:", error);
+      throw error;
+    }
+  }
+};
     try {
       const words = JSON.parse(response.text || "[]");
       return words.map((w: any, index: number) => ({
