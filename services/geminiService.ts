@@ -2,7 +2,6 @@
 import { Type, Modality } from "@google/genai";
 import { StudentLevel, Word, QuizQuestion, TargetLanguage } from "../types";
 
-// 重要：請務必將此處改為你 Render 部署後的實際網址
 const RENDER_RELAY_URL = 'https://startulip.onrender.com';
 
 function decodeBase64(base64: string): Uint8Array {
