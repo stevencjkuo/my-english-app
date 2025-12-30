@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
   </style>
   <script type="importmap">
 {
@@ -21,22 +21,8 @@
   }
 }
 </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script>
-    // 註冊 Babel 設定，確保能解析 TSX 語法
-    if (window.babel) {
-      babel.registerPreset('tsx-preset', {
-        presets: [
-          [babel.availablePresets['typescript'], { allExtensions: true, isTSX: true }],
-          [babel.availablePresets['react'], { runtime: 'automatic' }]
-        ]
-      });
-    }
-  </script>
 </head>
 <body>
   <div id="root"></div>
-  <!-- 確保 src 指向根目錄的 index.tsx -->
-  <script type="text/babel" data-type="module" data-presets="tsx-preset" src="index.tsx"></script>
 </body>
 </html>

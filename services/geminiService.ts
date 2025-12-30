@@ -1,5 +1,5 @@
 import { Type, Modality } from "@google/genai";
-import { StudentLevel, Word, QuizQuestion, TargetLanguage } from "../types.ts";
+import { StudentLevel, Word, QuizQuestion, TargetLanguage } from "../types";
 
 // 已更新為您的 Render 後端網址
 const RENDER_RELAY_URL = 'https://startulip.onrender.com';

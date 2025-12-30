@@ -1,12 +1,10 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Word, StudentLevel, QuizQuestion, UserStats, TargetLanguage } from './types.ts';
-import { geminiService } from './services/geminiService.ts';
-import WordCard from './components/WordCard.tsx';
-import Quiz from './components/Quiz.tsx';
+import { Word, StudentLevel, QuizQuestion, UserStats, TargetLanguage } from './types';
+import { geminiService } from './services/geminiService';
+import WordCard from './components/WordCard';
+import Quiz from './components/Quiz';
 
 const App: React.FC = () => {
-  const [hasApiKey] = useState<boolean>(true);
   const [level, setLevel] = useState<StudentLevel>(StudentLevel.JUNIOR);
   const [targetLang, setTargetLang] = useState<TargetLanguage>(TargetLanguage.TRADITIONAL_CHINESE);
   const [words, setWords] = useState<Word[]>([]);
